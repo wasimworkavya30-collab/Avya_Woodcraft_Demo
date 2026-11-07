@@ -1,3 +1,4 @@
+
 'use strict';
 
 const config = require('./config');
@@ -8,11 +9,18 @@ const { closeDb } = require('./db/index');
 const bootstrap = ensureDatabase();
 const app = createApp();
 
-const server = app.listen(config.port, config.host, () => {
+const PORT = process.env.PORT || config.port;
+const HOST = process.env.HOST || '0.0.0.0';
+
+const server = app.listen(PORT, HOST, () => {
   const address = server.address();
-  const port = address && typeof address === 'object' ? address.port : config.port;
-  const origin = `http://${config.host}:${port}`;
-  console.log(`Avya Woodcraft LLP — attendance API on ${origin}`);
+  const port = address && typeof address === 'object'
+    ? address.port
+    : PORT;
+
+  const origin = `http://${HOST}:${port}`;
+
+  console.log(`Avya Woodcraft LLP — attendance API running on port ${port}`);
   console.log(`Frontend: ${origin}/`);
   console.log(`Database: ${config.dbPath} (${bootstrap.seeded ? 'seeded from approved demo data' : 'ready'})`);
 });
