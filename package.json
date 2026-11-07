@@ -1,0 +1,23 @@
+{
+  "name": "avya-woodcraft-attendance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Three-tier attendance, payroll and workshop operations app for Avya Woodcraft LLP (frontend + REST API + SQLite).",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "main": "backend/src/server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev": "node --watch backend/src/server.js",
+    "db:init": "node backend/src/db/init.js",
+    "db:reset": "node backend/src/db/init.js --force",
+    "db:seed": "node backend/src/db/init.js --force",
+    "test": "node --test backend/test/*.test.js"
+  },
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}

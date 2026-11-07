@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# SQLite database files (created at runtime, seeded from database/seed)
+database/data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Tooling metadata
+.freebuff/
+
+# Logs and editor noise
+*.log
+npm-debug.log*
+.DS_Store
+.idea/
+.vscode/
+coverage/
