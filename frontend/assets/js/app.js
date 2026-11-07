@@ -874,18 +874,18 @@ function seedAdv(){
 
 /* ---------- salary and employee pay ---------- */
 function adminSalary(){
-  var ym=S.month,rows=repEmps(ym).map(function(e){var s=stats(e.id,ym),g=s.ap*e.rate,d=dedFor(e.id,ym);return {e:e,s:s,g:g,d:d,net:g-d,ob:outstanding(e.id)}});
+  var ym=S.month,rows=repEmps(ym).map(function(e){var s=stats(e.id,ym),k=e.id+':'+ym,ov=(S.salGross||{})[k],g=ov==null?s.ap*e.rate:ov,d=dedFor(e.id,ym);return {e:e,s:s,g:g,d:d,net:g-d,ob:outstanding(e.id),fixed:ov!=null}});
   var tg=0,td=0,tn=0,ta=0,tpe=0,tu=0,to=0;
   var body=rows.map(function(r){tg+=r.g;td+=r.d;tn+=r.net;ta+=r.s.ap;tpe+=r.s.pe;tu+=r.s.units;to+=r.ob;
-    return '<tr><td><button class="lnk" data-act="openEmp" data-id="'+r.e.id+'">'+avatar(r.e,null,34,1)+'<span><b>'+esc(r.e.name)+'</b><br><small class="muted">'+esc(r.e.role)+(r.e.active?'':' · removed')+'</small></span></button></td><td class="r mono">'+num(r.s.units)+'</td><td class="r mono">'+r.s.ap.toFixed(2)+(r.s.pe?'<br><small style="color:var(--warn)">+'+r.s.pe.toFixed(2)+' pending</small>':'')+'</td><td class="r"><input class="sm" type="number" min="0" step="5" value="'+r.e.rate+'" data-chg="rate" data-id="'+r.e.id+'" aria-label="Hourly rate for '+esc(r.e.name)+'"></td><td class="r mono">'+inr(r.g)+'</td><td class="r mono'+(r.ob>0?' neg':'')+'">'+inr(r.ob)+'</td><td class="r"><input class="sm" type="number" min="0" step="100" value="'+r.d+'" data-chg="salDed" data-e="'+r.e.id+'" aria-label="Advance to deduct from '+esc(r.e.name)+'"></td><td class="r"><b class="mono">'+inr(r.net)+'</b></td></tr>';
+    return '<tr><td><button class="lnk" data-act="openEmp" data-id="'+r.e.id+'">'+avatar(r.e,null,34,1)+'<span><b>'+esc(r.e.name)+'</b><br><small class="muted">'+esc(r.e.role)+(r.e.active?'':' · removed')+'</small></span></button></td><td class="r mono">'+num(r.s.units)+'</td><td class="r mono">'+r.s.ap.toFixed(2)+(r.s.pe?'<br><small style="color:var(--warn)">+'+r.s.pe.toFixed(2)+' pending</small>':'')+'</td><td class="r"><input class="sm" type="number" min="0" step="5" value="'+r.e.rate+'" data-chg="rate" data-id="'+r.e.id+'" aria-label="Hourly rate for '+esc(r.e.name)+'"></td><td class="r"><input class="sm" type="number" min="0" step="100" value="'+r.g+'" data-chg="salGross" data-e="'+r.e.id+'" data-m="'+ym+'" aria-label="Gross pay for '+esc(r.e.name)+'" title="Leave empty to use approved hours × hourly rate"></td><td class="r mono'+(r.ob>0?' neg':'')+'">'+inr(r.ob)+'</td><td class="r"><input class="sm" type="number" min="0" step="100" value="'+r.d+'" data-chg="salDed" data-e="'+r.e.id+'" aria-label="Advance to deduct from '+esc(r.e.name)+'"></td><td class="r"><b class="mono">'+inr(r.net)+'</b></td></tr>';
   }).join('');
   return '<div class="card"><div class="head-row"><div><h3>Monthly salary report</h3><span class="small muted">Net pay = approved hours × hourly rate − advance deducted</span></div>'+monthSwitch('month',ym)+'</div><div class="scroll"><table><thead><tr><th>Employee</th><th class="r">Days</th><th class="r">Approved h</th><th class="r">Rate</th><th class="r">Gross</th><th class="r">Advance balance</th><th class="r">Deduct this month ₹</th><th class="r">Net pay</th></tr></thead><tbody>'+body+'</tbody><tfoot><tr><td>Total</td><td class="r mono">'+num(tu)+'</td><td class="r mono">'+ta.toFixed(2)+'</td><td></td><td class="r mono">'+inr(tg)+'</td><td class="r mono">'+inr(to)+'</td><td class="r mono">'+inr(td)+'</td><td class="r mono">'+inr(tn)+'</td></tr></tfoot></table></div>'+
    '<p class="small muted" style="margin:12px 0 0">Click a name to open the full file. Days counts a full day as 1, half as 0.5, double shift as 2.'+(tpe>0?' '+tpe.toFixed(2)+' hours are still unapproved and are not in gross pay.':'')+'</p></div>';
 }
 function payCard(){
-  var e=emp(S.uid),st=stats(S.uid,S.emonth),g=st.ap*e.rate,d=dedFor(S.uid,S.emonth),ob=outstanding(S.uid);
+  var e=emp(S.uid),st=stats(S.uid,S.emonth),ov=(S.salGross||{})[S.uid+':'+S.emonth],g=ov==null?st.ap*e.rate:ov,d=dedFor(S.uid,S.emonth),ob=outstanding(S.uid);
   var adv=(ob>0||d>0)?'<div class="advbox"><div><span class="cap">Advance balance</span><b class="mono">'+inr(ob)+'</b></div><div><span class="cap">Deducted this month</span><b class="mono">'+inr(d)+'</b></div></div>':'';
-  return '<div class="card"><div class="head-row"><h3>Pay estimate</h3>'+monthSwitch('emonth',S.emonth)+'</div><div class="pay"><div><span class="cap">Net payable for '+ml(S.emonth)+'</span><div class="big num">'+inr(g-d)+'</div></div><div class="formula">'+H(st.ap)+' approved × '+inr(e.rate)+(d?' − '+inr(d)+' advance':'')+'</div></div>'+adv+
+  return '<div class="card"><div class="head-row"><h3>Pay estimate</h3>'+monthSwitch('emonth',S.emonth)+'</div><div class="pay"><div><span class="cap">Net payable for '+ml(S.emonth)+'</span><div class="big num">'+inr(g-d)+'</div></div><div class="formula">'+(ov==null?H(st.ap)+' approved × '+inr(e.rate):'Gross set by admin')+(d?' − '+inr(d)+' advance':'')+'</div></div>'+adv+
    '<p class="small muted" style="margin:10px 0 0">'+num(st.units)+' day'+(st.units===1?'':'s')+' counted ('+st.half+' half, '+st.dbl+' double shift). '+(st.pe>0?H(st.pe)+' still waiting for admin approval ('+inr(st.pe*e.rate)+').':'No hours waiting for approval.')+'</p></div>';
 }
 function adminAdvances(){
@@ -1353,6 +1353,10 @@ bizChange=function(el){
     var max=outstanding(eid)+dedFor(eid,ym),got=setDed(eid,ym,val);return ok(got<val?'Only '+inr(max)+' is outstanding. Deducted '+inr(got)+'.':'Deduction saved.')}
   if(k==='advAmt'){var a=S.advances.filter(function(x){return x.id===+el.dataset.id})[0];if(isNaN(val)||val<=0){toast('Enter an amount above 0.',1);render();return true}if(val<advPaid(a)){toast('Amount cannot be less than already deducted ('+inr(advPaid(a))+').',1);render();return true}a.amt=val;return ok()}
   if(k==='advNote'){S.advances.filter(function(x){return x.id===+el.dataset.id})[0].note=txt;return ok()}
+  if(k==='salGross'){var ge=+el.dataset.e,gk=ge+':'+el.dataset.m;
+    if(txt===''){if(S.salGross)delete S.salGross[gk];return ok('Gross reset to approved hours × rate.')}
+    if(isNaN(val)||val<0){toast('Enter an amount, 0 or more.',1);render();return true}
+    S.salGross=S.salGross||{};S.salGross[gk]=val;return ok('Gross pay saved.')}
   if(k==='pdDays'||k==='pdHours'){var e=+el.dataset.e,ds=el.dataset.d;
     if(k==='pdDays'){if(el.value===''||val===0){setDay(e,ds,0);return ok('Marked absent.')}if(isNaN(val)||val<0||val>3){toast('Days must be between 0 and 3.',1);render();return true}setDay(e,ds,val,null);return ok()}
     var rc=S.records.filter(function(r){return r.emp===e&&r.date===ds})[0];if(!rc){toast('Enter the days worked first.',1);render();return true}
